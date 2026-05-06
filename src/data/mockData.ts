@@ -175,6 +175,13 @@ export const assemblyAndFATData = [
   { id: 'P010', name: 'Project 10', assemblyProgress: 75, fatProgress: 30, status: 'On Track' },
 ];
 
+export const businessTripData = [
+  { id: 'T001', schedule: '2026-06-01 ~ 2026-06-05', engineerName: '林大宇', workContent: '設備A產線測試與驗收', expectedTarget: '完成設備A產線投產標準，確保良率達98%', status: 'Scheduled' },
+  { id: 'T002', schedule: '2026-06-10 ~ 2026-06-15', engineerName: '陳明杰', workContent: '新專案硬體架構評估會議', expectedTarget: '與客戶確認規格需求，並取得簽核', status: 'Scheduled' },
+  { id: 'T003', schedule: '2026-06-20 ~ 2026-06-22', engineerName: '張淑芬', workContent: 'B廠現場異常排除', expectedTarget: '解決現有控制系統連線不穩定問題', status: 'Pending' },
+  { id: 'T004', schedule: '2026-07-05 ~ 2026-07-10', engineerName: '王建國', workContent: '客戶端操作教育訓練', expectedTarget: '完成客戶端50位操作員的設備操作認證', status: 'Planned' },
+];
+
 export const supportListData = [
   { id: 'S-001', item: 'AWS 測試環境高權限帳號', status: 'Pending', requestingTeam: 'Backend', priority: 'High', dateRequested: '2026-05-01' },
   { id: 'S-002', item: '升級所有開發者的 Figma 專業版授權', status: 'Completed', requestingTeam: 'Design', priority: 'Medium', dateRequested: '2026-04-20' },

@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar, AreaChart, Area } from 'recharts';
-import { Activity, LayoutDashboard, Users, TrendingUp, AlertTriangle, UserCheck, HandHelping, Database, Menu, X, RefreshCw, Package, Wrench } from 'lucide-react';
+import { Activity, LayoutDashboard, Users, TrendingUp, AlertTriangle, UserCheck, HandHelping, Database, Menu, X, RefreshCw, Package, Wrench, Plane } from 'lucide-react';
 
 import { DataProvider, useData } from './data/DataContext';
 
@@ -363,6 +363,52 @@ function SupportList() {
   )
 }
 
+function BusinessTripPlan() {
+  const { businessTripData } = useData();
+
+  return (
+    <Card className="bg-slate-900 border-slate-800 rounded-2xl flex flex-col p-6 text-slate-200 border w-full min-h-[500px]">
+      <h2 className="text-xl font-semibold mb-6 shrink-0 flex items-center gap-2">
+        <Plane className="w-6 h-6 text-cyan-400" />
+        出差計畫與業務支援項目 (Business Trip & Support Plan)
+      </h2>
+      <div className="flex-grow overflow-auto pr-2">
+        <table className="w-full text-sm text-left border-separate border-spacing-y-3">
+          <thead>
+            <tr className="text-slate-400">
+              <th className="font-medium pb-2 px-4 w-56">出差時程 (Schedule)</th>
+              <th className="font-medium pb-2 px-2 w-32">工程師 (Engineer)</th>
+              <th className="font-medium pb-2 px-2 w-64">工作內容 (Content)</th>
+              <th className="font-medium pb-2 px-2">預期目標 (Target)</th>
+              <th className="font-medium pb-2 px-4 w-28">狀態 (Status)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {businessTripData.map((item) => (
+              <tr key={item.id} className="bg-slate-950/60 shadow-sm transition-colors hover:bg-slate-800/50">
+                <td className="py-4 px-4 rounded-l-xl font-mono text-slate-300 whitespace-nowrap">{item.schedule}</td>
+                <td className="py-4 px-2 text-slate-200 font-medium">{item.engineerName}</td>
+                <td className="py-4 px-2 text-slate-300">{item.workContent}</td>
+                <td className="py-4 px-2 text-slate-400">{item.expectedTarget}</td>
+                <td className="py-4 px-4 rounded-r-xl">
+                  <Badge variant="outline" className={`border-none ${
+                    item.status === 'Completed' ? 'bg-emerald-500/20 text-emerald-400' : 
+                    item.status === 'Scheduled' ? 'bg-blue-500/20 text-blue-400' :
+                    item.status === 'Planned' ? 'bg-indigo-500/20 text-indigo-400' :
+                    item.status === 'Pending' ? 'bg-amber-400/20 text-amber-400' : 'bg-slate-700 text-slate-300'
+                  }`}>
+                    {item.status}
+                  </Badge>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Card>
+  );
+}
+
 function SettingsView() {
   const { sheetUrl, setSheetUrl, syncData, isLoading, error } = useData();
 
@@ -423,6 +469,7 @@ function DashboardApp() {
     { id: 'gantt', label: '甘特圖與狀態', icon: <Activity className="w-5 h-5" /> },
     { id: 'safetystock', label: '長交期元件安全庫存', icon: <Package className="w-5 h-5" /> },
     { id: 'assembly', label: '組裝與廠內調試', icon: <Wrench className="w-5 h-5" /> },
+    { id: 'trip', label: '出差計畫與業務支援', icon: <Plane className="w-5 h-5" /> },
     { id: 'finance', label: '成本與費用管控', icon: <TrendingUp className="w-5 h-5" /> },
     { id: 'risk', label: '風險管控', icon: <AlertTriangle className="w-5 h-5" /> },
     { id: 'support', label: '後勤支援', icon: <HandHelping className="w-5 h-5" /> },
@@ -434,6 +481,7 @@ function DashboardApp() {
       case 'gantt': return <ProjectGanttStatus />;
       case 'safetystock': return <SafetyStockList />;
       case 'assembly': return <AssemblyAndFAT />;
+      case 'trip': return <BusinessTripPlan />;
       case 'finance': return <FinancialTracking />;
       case 'risk': return <RiskIssueRegister />;
       case 'support': return <SupportList />;

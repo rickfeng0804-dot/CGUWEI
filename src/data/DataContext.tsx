@@ -5,7 +5,8 @@ import {
   sCurveFinancialData as initialFinancialData, 
   riskAndIssuesData as initialRiskData, 
   supportListData as initialSupportData,
-  assemblyAndFATData as initialAssemblyAndFATData
+  assemblyAndFATData as initialAssemblyAndFATData,
+  businessTripData as initialBusinessTripData
 } from './mockData';
 
 interface DataContextType {
@@ -15,6 +16,7 @@ interface DataContextType {
   riskAndIssuesData: any[];
   supportListData: any[];
   assemblyAndFATData: any[];
+  businessTripData: any[];
   isLoading: boolean;
   error: string | null;
   sheetUrl: string;
@@ -35,6 +37,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [riskAndIssuesData, setRiskData] = useState(initialRiskData);
   const [supportListData, setSupportData] = useState(initialSupportData);
   const [assemblyAndFATData, setAssemblyAndFATData] = useState(initialAssemblyAndFATData);
+  const [businessTripData, setBusinessTripData] = useState(initialBusinessTripData);
 
   const syncData = async () => {
     if (!sheetUrl) {
@@ -82,6 +85,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       riskAndIssuesData,
       supportListData,
       assemblyAndFATData,
+      businessTripData,
       isLoading,
       error,
       sheetUrl,
