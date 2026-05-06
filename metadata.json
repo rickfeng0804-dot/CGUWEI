@@ -1,0 +1,6 @@
+{
+  "name": "專案管理可視化儀表板",
+  "description": "提供專案狀態、長交期元件安全庫存、成本與費用管控及風險管理的整合式專案管理 Dashboard。",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
