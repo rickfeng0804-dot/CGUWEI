@@ -182,6 +182,13 @@ export const businessTripData = [
   { id: 'T004', schedule: '2026-07-05 ~ 2026-07-10', engineerName: '王建國', workContent: '客戶端操作教育訓練', expectedTarget: '完成客戶端50位操作員的設備操作認證', status: 'Planned' },
 ];
 
+export const crossDeptCoordinationData = [
+  { id: 'C001', requestingDept: '電控一課', category: '系統整合', requestContent: '設備A與產線MES系統交握異常，需協助排查', supportingDept: '軟體部', responseContent: '已安排工程師於 6/5 現場連線查修，初判為防火牆擋住port', remarks: '待結案' },
+  { id: 'C002', requestingDept: '專案管理部', category: '交期協調', requestContent: '客戶提早兩週量產，請求馬達模組交期提前', supportingDept: '採購部', responseContent: '供應商回復最快可提早10天，但需加急費用', remarks: '評估加急費用中' },
+  { id: 'C003', requestingDept: '售後服務處', category: '技術支援', requestContent: 'C廠反應機械臂復位偶發過衝，需重新校正', supportingDept: '電控二課', responseContent: '將提供更新版韌體(v1.2.4)解決回授延遲問題', remarks: '預計 6/15 提供更新' },
+  { id: 'C004', requestingDept: '機構設計部', category: '規格變更', requestContent: '滑台空間縮減，需確認新型薄型感測器是否相容', supportingDept: '電控一課', responseContent: '已調閱規格書評估，接腳與訊號皆完全相容', remarks: '不影響現有電路圖' },
+];
+
 export const supportListData = [
   { id: 'S-001', item: 'AWS 測試環境高權限帳號', status: 'Pending', requestingTeam: 'Backend', priority: 'High', dateRequested: '2026-05-01' },
   { id: 'S-002', item: '升級所有開發者的 Figma 專業版授權', status: 'Completed', requestingTeam: 'Design', priority: 'Medium', dateRequested: '2026-04-20' },

@@ -6,7 +6,8 @@ import {
   riskAndIssuesData as initialRiskData, 
   supportListData as initialSupportData,
   assemblyAndFATData as initialAssemblyAndFATData,
-  businessTripData as initialBusinessTripData
+  businessTripData as initialBusinessTripData,
+  crossDeptCoordinationData as initialCrossDeptData
 } from './mockData';
 
 interface DataContextType {
@@ -17,6 +18,7 @@ interface DataContextType {
   supportListData: any[];
   assemblyAndFATData: any[];
   businessTripData: any[];
+  crossDeptCoordinationData: any[];
   isLoading: boolean;
   error: string | null;
   sheetUrl: string;
@@ -38,6 +40,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [supportListData, setSupportData] = useState(initialSupportData);
   const [assemblyAndFATData, setAssemblyAndFATData] = useState(initialAssemblyAndFATData);
   const [businessTripData, setBusinessTripData] = useState(initialBusinessTripData);
+  const [crossDeptCoordinationData, setCrossDeptCoordinationData] = useState(initialCrossDeptData);
 
   const syncData = async () => {
     if (!sheetUrl) {
@@ -86,6 +89,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       supportListData,
       assemblyAndFATData,
       businessTripData,
+      crossDeptCoordinationData,
       isLoading,
       error,
       sheetUrl,

@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar, AreaChart, Area } from 'recharts';
-import { Activity, LayoutDashboard, Users, TrendingUp, AlertTriangle, UserCheck, HandHelping, Database, Menu, X, RefreshCw, Package, Wrench, Plane } from 'lucide-react';
+import { Activity, LayoutDashboard, Users, TrendingUp, AlertTriangle, UserCheck, HandHelping, Database, Menu, X, RefreshCw, Package, Wrench, Plane, Handshake } from 'lucide-react';
 
 import { DataProvider, useData } from './data/DataContext';
 
@@ -409,6 +409,49 @@ function BusinessTripPlan() {
   );
 }
 
+function CrossDeptCoordination() {
+  const { crossDeptCoordinationData } = useData();
+
+  return (
+    <Card className="bg-slate-900 border-slate-800 rounded-2xl flex flex-col p-6 text-slate-200 border w-full min-h-[500px]">
+      <h2 className="text-xl font-semibold mb-6 shrink-0 flex items-center gap-2">
+        <Handshake className="w-6 h-6 text-purple-400" />
+        跨部門協調事項 (Cross-Department Coordination)
+      </h2>
+      <div className="flex-grow overflow-auto pr-2">
+        <table className="w-full text-sm text-left border-separate border-spacing-y-3">
+          <thead>
+            <tr className="text-slate-400">
+              <th className="font-medium pb-2 px-4 w-32">需求單位</th>
+              <th className="font-medium pb-2 px-2 w-28">分類</th>
+              <th className="font-medium pb-2 px-2 w-64">需求內容</th>
+              <th className="font-medium pb-2 px-2 w-32">支援單位</th>
+              <th className="font-medium pb-2 px-2 w-64">回覆內容</th>
+              <th className="font-medium pb-2 px-4 w-40">備註</th>
+            </tr>
+          </thead>
+          <tbody>
+            {crossDeptCoordinationData.map((item) => (
+              <tr key={item.id} className="bg-slate-950/60 shadow-sm transition-colors hover:bg-slate-800/50">
+                <td className="py-4 px-4 rounded-l-xl font-medium text-slate-300">{item.requestingDept}</td>
+                <td className="py-4 px-2">
+                  <Badge variant="outline" className="border-slate-700 text-slate-300">
+                    {item.category}
+                  </Badge>
+                </td>
+                <td className="py-4 px-2 text-slate-200">{item.requestContent}</td>
+                <td className="py-4 px-2 font-medium text-blue-400">{item.supportingDept}</td>
+                <td className="py-4 px-2 text-slate-300">{item.responseContent}</td>
+                <td className="py-4 px-4 rounded-r-xl text-slate-400 text-xs">{item.remarks}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Card>
+  );
+}
+
 function SettingsView() {
   const { sheetUrl, setSheetUrl, syncData, isLoading, error } = useData();
 
@@ -470,6 +513,7 @@ function DashboardApp() {
     { id: 'safetystock', label: '長交期元件安全庫存', icon: <Package className="w-5 h-5" /> },
     { id: 'assembly', label: '組裝與廠內調試', icon: <Wrench className="w-5 h-5" /> },
     { id: 'trip', label: '出差計畫與業務支援', icon: <Plane className="w-5 h-5" /> },
+    { id: 'coordination', label: '跨部門協調事項', icon: <Handshake className="w-5 h-5" /> },
     { id: 'finance', label: '成本與費用管控', icon: <TrendingUp className="w-5 h-5" /> },
     { id: 'risk', label: '風險管控', icon: <AlertTriangle className="w-5 h-5" /> },
     { id: 'support', label: '後勤支援', icon: <HandHelping className="w-5 h-5" /> },
@@ -482,6 +526,7 @@ function DashboardApp() {
       case 'safetystock': return <SafetyStockList />;
       case 'assembly': return <AssemblyAndFAT />;
       case 'trip': return <BusinessTripPlan />;
+      case 'coordination': return <CrossDeptCoordination />;
       case 'finance': return <FinancialTracking />;
       case 'risk': return <RiskIssueRegister />;
       case 'support': return <SupportList />;
