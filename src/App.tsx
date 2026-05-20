@@ -69,7 +69,7 @@ function ProjectGanttStatus() {
               </div>
             </div>
             <div className="flex justify-between text-xs text-slate-400 pl-[25%] mt-2 ml-4">
-              <span className="bg-slate-900 px-2 py-1 rounded">預算使用: ${proj.actualCost.toLocaleString()} / ${proj.budget.toLocaleString()}</span>
+              <span className="bg-slate-900 px-2 py-1 rounded">預算使用: ${(proj.actualCost || 0).toLocaleString()} / ${(proj.budget || 0).toLocaleString()}</span>
               <span className="flex gap-3">
                 <span className="bg-rose-950/30 text-rose-400 px-2 py-1 rounded">風險 (Risk): {proj.activeRisks}</span>
                 <span className="bg-amber-950/30 text-amber-400 px-2 py-1 rounded">問題 (Issue): {proj.activeIssues}</span>
@@ -453,7 +453,28 @@ function CrossDeptCoordination() {
 }
 
 function SettingsView() {
-  const { sheetUrl, setSheetUrl, syncData, isLoading, error } = useData();
+  const { isLoading, error, importDataCSV, exportDataCSV } = useData();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [importTarget, setImportTarget] = React.useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0 && importTarget) {
+      importDataCSV(importTarget, e.target.files[0]);
+      e.target.value = ''; // Reset input to allow identical file selection
+      setImportTarget(null);
+    }
+  };
+
+  const dataModules = [
+    { id: 'gantt', label: '甘特圖與狀態' },
+    { id: 'safetystock', label: '長交期元件安全庫存' },
+    { id: 'assembly', label: '組裝與廠內調試' },
+    { id: 'trip', label: '出差計畫與業務支援' },
+    { id: 'coordination', label: '跨部門協調事項' },
+    { id: 'finance', label: '成本與費用管控' },
+    { id: 'risk', label: '風險管控' },
+    { id: 'support', label: '後勤支援' },
+  ];
 
   return (
     <Card className="bg-slate-900 border-slate-800 rounded-2xl flex flex-col p-6 text-slate-200 border w-full max-w-2xl mx-auto mt-10">
@@ -462,28 +483,45 @@ function SettingsView() {
         資料庫設定 (Database Settings)
       </h2>
       <div className="space-y-6">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-300">
-            Google Sheet 分享連結 (發佈到網路取得的 CSV 網址)
-          </label>
-          <div className="flex gap-3">
-            <Input 
-              type="text" 
-              placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv" 
-              value={sheetUrl}
-              onChange={(e) => setSheetUrl(e.target.value)}
-              className="bg-slate-950 border-slate-700 text-slate-200 w-full"
-            />
-            <Button 
-              onClick={syncData} 
-              disabled={isLoading}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white min-w-[100px]"
-            >
-              {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : "同步資料"}
-            </Button>
+        <div className="pt-4 space-y-4">
+          <h3 className="text-sm font-medium text-slate-300 flex items-center gap-2">
+            <Package className="w-4 h-4 text-slate-400" /> 
+            本地資料備份與匯入 (Local CSV Import / Export)
+          </h3>
+          <input 
+            type="file" 
+            accept=".csv" 
+            ref={fileInputRef} 
+            style={{ display: 'none' }} 
+            onChange={handleFileChange} 
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {dataModules.map(module => (
+              <div key={module.id} className="flex flex-col gap-2 p-3 bg-slate-950 border border-slate-800 rounded-lg">
+                <div className="text-sm font-medium text-slate-300 mb-1">{module.label}</div>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => { setImportTarget(module.id); fileInputRef.current?.click(); }} 
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-500 text-white border-transparent flex-1 text-xs"
+                  >
+                    <Users className="w-3 h-3 mr-1" />
+                    匯入 (Import)
+                  </Button>
+                  <Button 
+                    onClick={() => exportDataCSV(module.id)} 
+                    size="sm"
+                    className="bg-rose-600 hover:bg-rose-500 text-white border-transparent flex-1 text-xs"
+                  >
+                    <LayoutDashboard className="w-3 h-3 mr-1" />
+                    匯出 (Export)
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-        
+
         {error && (
           <div className="p-3 bg-rose-500/10 border border-rose-500/50 rounded-lg text-rose-400 text-sm">
             {error}
@@ -492,12 +530,9 @@ function SettingsView() {
 
         <div className="p-4 bg-blue-900/10 border border-blue-900/30 rounded-lg text-sm text-slate-400 space-y-2">
           <p className="font-semibold text-blue-300">使用說明：</p>
-          <ol className="list-decimal pl-5 space-y-1">
-            <li>在 Google Sheet 中，點擊「檔案」&gt;「共用」&gt;「發佈到網路」。</li>
-            <li>選擇你要匯出的工作表，將格式改為「逗號分隔值 (.csv)」。</li>
-            <li>將產生的網址複製並貼上到上方的輸入框中，點擊「同步資料」。</li>
-            <li><span className="text-slate-200">備註：</span>目前為展示版本，若未提供網址，系統將使用內建的模擬資料庫。</li>
-          </ol>
+          <ul className="list-disc pl-5 space-y-1">
+            <li><strong>個別頁面 CSV 匯出/匯入：</strong> 可在上方「本地資料備份與匯入」區塊針對每個模組進行資料集的備份。</li>
+          </ul>
         </div>
       </div>
     </Card>
@@ -608,9 +643,6 @@ function DashboardApp() {
             {navItems.find(i => i.id === activeTab)?.label}
           </h2>
           <div className="flex items-center gap-4">
-            <Badge variant="outline" className="px-3 py-1 bg-slate-900 border-slate-700 text-slate-400">
-              最後同步 (Last Sync): {new Date().toLocaleTimeString()}
-            </Badge>
           </div>
         </div>
 

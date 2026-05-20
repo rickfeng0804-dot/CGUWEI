@@ -21,15 +21,15 @@ interface DataContextType {
   crossDeptCoordinationData: any[];
   isLoading: boolean;
   error: string | null;
-  sheetUrl: string;
-  setSheetUrl: (url: string) => void;
-  syncData: () => Promise<void>;
+  importDataCSV: (type: string, file: File) => void;
+  exportDataCSV: (type: string) => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
+import Papa from 'papaparse';
+
 export function DataProvider({ children }: { children: React.ReactNode }) {
-  const [sheetUrl, setSheetUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,41 +42,125 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [businessTripData, setBusinessTripData] = useState(initialBusinessTripData);
   const [crossDeptCoordinationData, setCrossDeptCoordinationData] = useState(initialCrossDeptData);
 
-  const syncData = async () => {
-    if (!sheetUrl) {
-      setError('請輸入發佈為 CSV 的 Google Sheet 連結 (Please enter a published Google Sheet CSV URL)');
-      return;
+  const importDataCSV = (type: string, file: File) => {
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        const data = results.data as any[];
+        if (data.length === 0) {
+          alert('CSV 檔案沒有資料或無法讀取。');
+          return;
+        }
+
+        switch (type) {
+          case 'gantt':
+            setProjectStatusData(data.map(row => ({
+              id: row.id || row.Id || row.ID || '',
+              name: row.name || row.Name || '',
+              progress: Number(row.progress || row.Progress) || 0,
+              status: row.status || row.Status || 'On Track',
+              owner: row.owner || row.Owner || '',
+              startDate: row.startDate || row['Start Date'] || '',
+              endDate: row.endDate || row['End Date'] || '',
+              delayDays: Number(row.delayDays || row['Delay Days']) || 0,
+              budget: Number(row.budget || row.Budget) || 0,
+              actualCost: Number(row.actualCost || row['Actual Cost']) || 0,
+              activeRisks: Number(row.activeRisks || row['Active Risks']) || 0,
+              activeIssues: Number(row.activeIssues || row['Active Issues']) || 0,
+            })));
+            break;
+          case 'safetystock':
+            setSafetyStockData(data);
+            break;
+          case 'finance':
+            setSCurveFinancialData(data.map(row => ({
+              ...row,
+              plannedCost: Number(row.plannedCost) || 0,
+              actualCost: Number(row.actualCost) || 0
+            })));
+            break;
+          case 'risk':
+            setRiskData(data);
+            break;
+          case 'support':
+            setSupportData(data);
+            break;
+          case 'assembly':
+            setAssemblyAndFATData(data.map(row => ({
+              ...row,
+              assemblyProgress: Number(row.assemblyProgress) || 0,
+              fatProgress: Number(row.fatProgress) || 0
+            })));
+            break;
+          case 'trip':
+            setBusinessTripData(data);
+            break;
+          case 'coordination':
+            setCrossDeptCoordinationData(data);
+            break;
+          default:
+            alert('未知的資料類型匯入');
+            return;
+        }
+        alert('成功從 CSV 匯入資料！');
+      },
+      error: (err: any) => {
+        alert(err.message || 'CSV 解析失敗');
+      }
+    });
+  };
+
+  const exportDataCSV = (type: string) => {
+    let dataToExport: any[] = [];
+    let filename = 'export.csv';
+
+    switch (type) {
+      case 'gantt':
+        dataToExport = projectStatusData;
+        filename = 'project_status_export.csv';
+        break;
+      case 'safetystock':
+        dataToExport = safetyStockData;
+        filename = 'safety_stock_export.csv';
+        break;
+      case 'finance':
+        dataToExport = sCurveFinancialData;
+        filename = 'financial_export.csv';
+        break;
+      case 'risk':
+        dataToExport = riskAndIssuesData;
+        filename = 'risk_issues_export.csv';
+        break;
+      case 'support':
+        dataToExport = supportListData;
+        filename = 'support_list_export.csv';
+        break;
+      case 'assembly':
+        dataToExport = assemblyAndFATData;
+        filename = 'assembly_fat_export.csv';
+        break;
+      case 'trip':
+        dataToExport = businessTripData;
+        filename = 'business_trip_export.csv';
+        break;
+      case 'coordination':
+        dataToExport = crossDeptCoordinationData;
+        filename = 'cross_dept_coordination_export.csv';
+        break;
     }
 
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // 這裡實作真實的 Google Sheet CSV 讀取 (Here we simulate or implement actual Google Sheet CSV parsing)
-      // 未來可以引入 papaparse 來解析真实的 CSV
-      // 目前我們透過 fetch 來捕捉並簡單模擬資料更新
-      const response = await fetch(sheetUrl);
-      if (!response.ok) throw new Error('無法讀取 Google Sheet (Failed to fetch Google Sheet)');
-      
-      const csvText = await response.text();
-      
-      // 若成功讀取，這裡應該要有解析 CSV 的邏輯
-      // 此處僅作為示範，我們使用原本的資料但加入一些隨機變化來展示「資料已更新」
-      
-      const updatedProjects = initialProjectData.map(p => ({
-        ...p,
-        progress: Math.min(100, p.progress + Math.floor(Math.random() * 10))
-      }));
-
-      setProjectStatusData(updatedProjects);
-      
-      // 成功提示
-      alert('已成功從 Google Sheet 同步資料！');
-      
-    } catch (err: any) {
-      setError(err.message || '同步失敗');
-    } finally {
-      setIsLoading(false);
+    const csv = Papa.unparse(dataToExport);
+    const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csv], { type: 'text/csv;charset=utf-8;' }); // Add BOM for Excel
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 
@@ -92,9 +176,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       crossDeptCoordinationData,
       isLoading,
       error,
-      sheetUrl,
-      setSheetUrl,
-      syncData
+      importDataCSV,
+      exportDataCSV
     }}>
       {children}
     </DataContext.Provider>
